@@ -18,6 +18,20 @@ export async function transactionsRoutes(app: FastifyInstance) {
     return { transactions }
   })
 
+  app.get('/all', async () => {
+    const transactions = await knex('transactions').select('*')
+
+    return { transactions }
+  })
+
+  app.get('/summary/all', async () => {
+    const summary = await knex('transactions')
+      .sum('amount', { as: 'amount' })
+      .first()
+
+    return { summary }
+  })
+
   app.get('/:id', { preHandler: [checkSessionIdExists] }, async (req) => {
     const getTransactionParamsSchema = z.object({
       id: z.string().uuid(),
@@ -41,6 +55,8 @@ export async function transactionsRoutes(app: FastifyInstance) {
       .where('session_id', sessionId)
       .sum('amount', { as: 'amount' })
       .first()
+
+    console.log(summary)
 
     return { summary }
   })
